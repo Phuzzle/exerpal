@@ -5,16 +5,62 @@ import { collection, addDoc } from 'firebase/firestore';
 const CreateSchedule = () => {
   // Define exercise categories and exercises
   const exercises = {
-    'pec-dominant': ['Barbell Bench Press', 'Dumbbell Bench Press', 'Push-ups'],
-    'shoulder-dominant': ['Overhead Press (Barbell)', 'Push Press', 'Arnold Press'],
-    'upper-back-horizontal': ['Barbell Row', 'Bent-Over Row (Dumbbell)', 'Machine row'],
-    'upper-back-vertical': ['Pull-Ups', 'Lat Pulldowns', 'Close-Grip Lat Pulldown'],
-    'hip-dominant': ['Deadlifts', 'Romanian Deadlifts (RDLs)', 'Barbell Hip Thrust', 'Good Mornings'],
-    'knee-dominant': ['Barbell Back Squat', 'Front Squat', 'Walking Lunges (weighted)'],
-    'hip-dominant-accessory': ['Glute Bridges', 'Single-Leg RDLs', 'Barbell Hip Thrust', 'Glute Ham Raises'],
-    'quad-dominant-accessory': ['Goblet Squats', 'Step-Ups', 'Bulgarian Split Squats', 'Wall Sit'],
-    'calves': ['Standing Calf Raises (Barbell)', 'Seated Calf Raises (Dumbbell)', 'Single-Leg Calf Raises'],
-    'vanity-lifts': ['Dumbbell Flyes', 'Barbell Curls', 'Skullcrushers', 'Crunches', 'Shrugs', 'Lateral Raise (Dumbbell)']
+    'pec-dominant': [
+      { name: 'Barbell Bench Press', type: 'weighted' },
+      { name: 'Dumbbell Bench Press', type: 'weighted' },
+      { name: 'Push-ups', type: 'bodyweight' }
+    ],
+    'shoulder-dominant': [
+      { name: 'Overhead Press (Barbell)', type: 'weighted' },
+      { name: 'Push Press', type: 'weighted' },
+      { name: 'Arnold Press', type: 'weighted' }
+    ],
+    'upper-back-horizontal': [
+      { name: 'Barbell Row', type: 'weighted' },
+      { name: 'Bent-Over Row (Dumbbell)', type: 'weighted' },
+      { name: 'Machine row', type: 'weighted' }
+    ],
+    'upper-back-vertical': [
+      { name: 'Pull-Ups', type: 'bodyweight' },
+      { name: 'Lat Pulldowns', type: 'weighted' },
+      { name: 'Close-Grip Lat Pulldown', type: 'weighted' }
+    ],
+    'hip-dominant': [
+      { name: 'Deadlifts', type: 'weighted' },
+      { name: 'Romanian Deadlifts (RDLs)', type: 'weighted' },
+      { name: 'Barbell Hip Thrust', type: 'weighted' },
+      { name: 'Good Mornings', type: 'weighted' }
+    ],
+    'knee-dominant': [
+      { name: 'Barbell Back Squat', type: 'weighted' },
+      { name: 'Front Squat', type: 'weighted' },
+      { name: 'Walking Lunges (weighted)', type: 'weighted' }
+    ],
+    'hip-dominant-accessory': [
+      { name: 'Glute Bridges', type: 'bodyweight' },
+      { name: 'Single-Leg RDLs', type: 'weighted' },
+      { name: 'Barbell Hip Thrust', type: 'weighted' },
+      { name: 'Glute Ham Raises', type: 'bodyweight' }
+    ],
+    'quad-dominant-accessory': [
+      { name: 'Goblet Squats', type: 'weighted' },
+      { name: 'Step-Ups', type: 'weighted' },
+      { name: 'Bulgarian Split Squats', type: 'weighted' },
+      { name: 'Wall Sit', type: 'bodyweight' }
+    ],
+    'calves': [
+      { name: 'Standing Calf Raises (Barbell)', type: 'weighted' },
+      { name: 'Seated Calf Raises (Dumbbell)', type: 'weighted' },
+      { name: 'Single-Leg Calf Raises', type: 'bodyweight' }
+    ],
+    'vanity-lifts': [
+      { name: 'Dumbbell Flyes', type: 'weighted' },
+      { name: 'Barbell Curls', type: 'weighted' },
+      { name: 'Skullcrushers', type: 'weighted' },
+      { name: 'Crunches', type: 'bodyweight' },
+      { name: 'Shrugs', type: 'weighted' },
+      { name: 'Lateral Raise (Dumbbell)', type: 'weighted' }
+    ]
   };
 
   // Define the specific exercise limits per muscle group for each day
@@ -59,8 +105,8 @@ const CreateSchedule = () => {
 
   // Function to handle exercise selection
   const handleExerciseSelection = (day, exercise) => {
-    const muscleGroup = Object.keys(exercises).find(key => exercises[key].includes(exercise));
-    const currentCount = selectedExercises[day].filter(ex => exercises[muscleGroup].includes(ex)).length;
+    const muscleGroup = Object.keys(exercises).find(key => exercises[key].some(ex => ex.name === exercise));
+    const currentCount = selectedExercises[day].filter(ex => exercises[muscleGroup].some(e => e.name === ex)).length;
 
     if (currentCount < exerciseLimits[day][muscleGroup] && !selectedExercises[day].includes(exercise)) {
       setSelectedExercises(prevState => ({
@@ -100,7 +146,7 @@ const CreateSchedule = () => {
           <h3>Pec Dominant</h3>
           <ul>
             {exercises['pec-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day1', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day1', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -108,7 +154,7 @@ const CreateSchedule = () => {
           <h3>Upper Back Horizontal</h3>
           <ul>
             {exercises['upper-back-horizontal'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day1', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day1', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -116,7 +162,7 @@ const CreateSchedule = () => {
           <h3>Shoulder Dominant</h3>
           <ul>
             {exercises['shoulder-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day1', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day1', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -124,7 +170,7 @@ const CreateSchedule = () => {
           <h3>Upper Back Vertical</h3>
           <ul>
             {exercises['upper-back-vertical'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day1', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day1', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -141,7 +187,7 @@ const CreateSchedule = () => {
           <h3>Knee Dominant</h3>
           <ul>
             {exercises['knee-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day2', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day2', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -149,7 +195,7 @@ const CreateSchedule = () => {
           <h3>Hip Dominant Accessory</h3>
           <ul>
             {exercises['hip-dominant-accessory'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day2', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day2', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -157,7 +203,7 @@ const CreateSchedule = () => {
           <h3>Quad Dominant Accessory</h3>
           <ul>
             {exercises['quad-dominant-accessory'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day2', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day2', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -165,7 +211,7 @@ const CreateSchedule = () => {
           <h3>Calves</h3>
           <ul>
             {exercises['calves'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day2', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day2', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -182,7 +228,7 @@ const CreateSchedule = () => {
           <h3>Shoulder Dominant</h3>
           <ul>
             {exercises['shoulder-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day3', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day3', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -190,7 +236,7 @@ const CreateSchedule = () => {
           <h3>Upper Back Vertical</h3>
           <ul>
             {exercises['upper-back-vertical'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day3', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day3', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -198,7 +244,7 @@ const CreateSchedule = () => {
           <h3>Pec Dominant</h3>
           <ul>
             {exercises['pec-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day3', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day3', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -206,7 +252,7 @@ const CreateSchedule = () => {
           <h3>Upper Back Horizontal</h3>
           <ul>
             {exercises['upper-back-horizontal'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day3', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day3', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -223,7 +269,7 @@ const CreateSchedule = () => {
           <h3>Hip Dominant</h3>
           <ul>
             {exercises['hip-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day4', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day4', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -231,7 +277,7 @@ const CreateSchedule = () => {
           <h3>Knee Dominant</h3>
           <ul>
             {exercises['knee-dominant'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day4', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day4', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -239,7 +285,7 @@ const CreateSchedule = () => {
           <h3>Hip Dominant Accessory</h3>
           <ul>
             {exercises['hip-dominant-accessory'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day4', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day4', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -247,7 +293,7 @@ const CreateSchedule = () => {
           <h3>Calves</h3>
           <ul>
             {exercises['calves'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day4', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day4', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
@@ -264,7 +310,7 @@ const CreateSchedule = () => {
           <h3>Vanity Lifts</h3>
           <ul>
             {exercises['vanity-lifts'].map(exercise => (
-              <li key={exercise} onClick={() => handleExerciseSelection('day5', exercise)}>{exercise}</li>
+              <li key={exercise.name} onClick={() => handleExerciseSelection('day5', exercise.name)}>{exercise.name}</li>
             ))}
           </ul>
         </div>
