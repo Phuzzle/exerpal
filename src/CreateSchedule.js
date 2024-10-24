@@ -6,60 +6,60 @@ const CreateSchedule = () => {
   // Define exercise categories and exercises
   const exercises = {
     'pec-dominant': [
-      { name: 'Barbell Bench Press', type: 'weighted' },
-      { name: 'Dumbbell Bench Press', type: 'weighted' },
-      { name: 'Push-ups', type: 'bodyweight' }
+      { name: 'Barbell Bench Press', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Dumbbell Bench Press', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Push-ups', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'shoulder-dominant': [
-      { name: 'Overhead Press (Barbell)', type: 'weighted' },
-      { name: 'Push Press', type: 'weighted' },
-      { name: 'Arnold Press', type: 'weighted' }
+      { name: 'Overhead Press (Barbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Push Press', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Arnold Press', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'upper-back-horizontal': [
-      { name: 'Barbell Row', type: 'weighted' },
-      { name: 'Bent-Over Row (Dumbbell)', type: 'weighted' },
-      { name: 'Machine row', type: 'weighted' }
+      { name: 'Barbell Row', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Bent-Over Row (Dumbbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Machine row', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'upper-back-vertical': [
-      { name: 'Pull-Ups', type: 'bodyweight' },
-      { name: 'Lat Pulldowns', type: 'weighted' },
-      { name: 'Close-Grip Lat Pulldown', type: 'weighted' }
+      { name: 'Pull-Ups', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Lat Pulldowns', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Close-Grip Lat Pulldown', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'hip-dominant': [
-      { name: 'Deadlifts', type: 'weighted' },
-      { name: 'Romanian Deadlifts (RDLs)', type: 'weighted' },
-      { name: 'Barbell Hip Thrust', type: 'weighted' },
-      { name: 'Good Mornings', type: 'weighted' }
+      { name: 'Deadlifts', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Romanian Deadlifts (RDLs)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Barbell Hip Thrust', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Good Mornings', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'knee-dominant': [
-      { name: 'Barbell Back Squat', type: 'weighted' },
-      { name: 'Front Squat', type: 'weighted' },
-      { name: 'Walking Lunges (weighted)', type: 'weighted' }
+      { name: 'Barbell Back Squat', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Front Squat', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Walking Lunges (weighted)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'hip-dominant-accessory': [
-      { name: 'Glute Bridges', type: 'bodyweight' },
-      { name: 'Single-Leg RDLs', type: 'weighted' },
-      { name: 'Barbell Hip Thrust', type: 'weighted' },
-      { name: 'Glute Ham Raises', type: 'bodyweight' }
+      { name: 'Glute Bridges', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Single-Leg RDLs', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Barbell Hip Thrust', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Glute Ham Raises', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'quad-dominant-accessory': [
-      { name: 'Goblet Squats', type: 'weighted' },
-      { name: 'Step-Ups', type: 'weighted' },
-      { name: 'Bulgarian Split Squats', type: 'weighted' },
-      { name: 'Wall Sit', type: 'bodyweight' }
+      { name: 'Goblet Squats', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Step-Ups', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Bulgarian Split Squats', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Wall Sit', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'calves': [
-      { name: 'Standing Calf Raises (Barbell)', type: 'weighted' },
-      { name: 'Seated Calf Raises (Dumbbell)', type: 'weighted' },
-      { name: 'Single-Leg Calf Raises', type: 'bodyweight' }
+      { name: 'Standing Calf Raises (Barbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Seated Calf Raises (Dumbbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Single-Leg Calf Raises', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'vanity-lifts': [
-      { name: 'Dumbbell Flyes', type: 'weighted' },
-      { name: 'Barbell Curls', type: 'weighted' },
-      { name: 'Skullcrushers', type: 'weighted' },
-      { name: 'Crunches', type: 'bodyweight' },
-      { name: 'Shrugs', type: 'weighted' },
-      { name: 'Lateral Raise (Dumbbell)', type: 'weighted' }
+      { name: 'Dumbbell Flyes', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Barbell Curls', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Skullcrushers', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Crunches', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Shrugs', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
+      { name: 'Lateral Raise (Dumbbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ]
   };
 
@@ -104,14 +104,15 @@ const CreateSchedule = () => {
   });
 
   // Function to handle exercise selection
-  const handleExerciseSelection = (day, exercise) => {
-    const muscleGroup = Object.keys(exercises).find(key => exercises[key].some(ex => ex.name === exercise));
-    const currentCount = selectedExercises[day].filter(ex => exercises[muscleGroup].some(e => e.name === ex)).length;
+  const handleExerciseSelection = (day, exerciseName) => {
+    const muscleGroup = Object.keys(exercises).find(key => exercises[key].some(ex => ex.name === exerciseName));
+    const currentCount = selectedExercises[day].filter(ex => exercises[muscleGroup].some(e => e.name === ex.name)).length;
+    const exercise = exercises[muscleGroup].find(ex => ex.name === exerciseName);
 
-    if (currentCount < exerciseLimits[day][muscleGroup] && !selectedExercises[day].includes(exercise)) {
+    if (currentCount < exerciseLimits[day][muscleGroup] && !selectedExercises[day].some(ex => ex.name === exerciseName)) {
       setSelectedExercises(prevState => ({
         ...prevState,
-        [day]: [...prevState[day], exercise]
+        [day]: [...prevState[day], { ...exercise }]
       }));
     }
   };
@@ -177,7 +178,7 @@ const CreateSchedule = () => {
         <h3>Selected Exercises:</h3>
         <ul>
           {selectedExercises.day1.map(exercise => (
-            <li key={exercise}>{exercise}</li>
+            <li key={exercise.name}>{exercise.name}</li>
           ))}
         </ul>
       </div>
@@ -218,7 +219,7 @@ const CreateSchedule = () => {
         <h3>Selected Exercises:</h3>
         <ul>
           {selectedExercises.day2.map(exercise => (
-            <li key={exercise}>{exercise}</li>
+            <li key={exercise.name}>{exercise.name}</li>
           ))}
         </ul>
       </div>
@@ -259,7 +260,7 @@ const CreateSchedule = () => {
         <h3>Selected Exercises:</h3>
         <ul>
           {selectedExercises.day3.map(exercise => (
-            <li key={exercise}>{exercise}</li>
+            <li key={exercise.name}>{exercise.name}</li>
           ))}
         </ul>
       </div>
@@ -300,7 +301,7 @@ const CreateSchedule = () => {
         <h3>Selected Exercises:</h3>
         <ul>
           {selectedExercises.day4.map(exercise => (
-            <li key={exercise}>{exercise}</li>
+            <li key={exercise.name}>{exercise.name}</li>
           ))}
         </ul>
       </div>
@@ -317,7 +318,7 @@ const CreateSchedule = () => {
         <h3>Selected Exercises:</h3>
         <ul>
           {selectedExercises.day5.map(exercise => (
-            <li key={exercise}>{exercise}</li>
+            <li key={exercise.name}>{exercise.name}</li>
           ))}
         </ul>
       </div>
