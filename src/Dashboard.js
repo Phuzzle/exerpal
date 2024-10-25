@@ -12,7 +12,9 @@ const Dashboard = () => {
       <Link to="/resume-schedule">
         <button>Resume existing schedule</button>
       </Link>
-      <button>Adjust exercise progress</button>
+      <Link to="/adjust-progress">
+        <button>Adjust exercise progress</button>
+      </Link>
       <button>Workout history</button>
     </div>
   );
