@@ -134,7 +134,7 @@ const CreateSchedule = () => {
         return;
       }
 
-      const docRef = await addDoc(collection(db, 'schedules'), {
+      await addDoc(collection(db, 'schedules'), {
         exercises: selectedExercises,
         userId: user.uid,
         createdAt: new Date()

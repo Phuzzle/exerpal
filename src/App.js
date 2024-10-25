@@ -6,6 +6,7 @@ import Dashboard from './Dashboard';
 import CreateSchedule from './CreateSchedule';
 import ResumeSchedule from './ResumeSchedule';
 import AdjustProgress from './AdjustProgress';
+import WorkoutHistory from './WorkoutHistory';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/create-schedule" element={<CreateSchedule />} />
           <Route path="/resume-schedule" element={<ResumeSchedule />} />
           <Route path="/adjust-progress" element={<AdjustProgress />} />
+          <Route path="/workout-history" element={<WorkoutHistory />} />
         </Routes>
       </div>
     </Router>

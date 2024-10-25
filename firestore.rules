@@ -12,6 +12,11 @@ service cloud.firestore {
       allow read, update: if request.auth != null && request.auth.uid == userId;
     }
 
+    match /workoutHistory/{document} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
     match /{document=**} {
       allow read: if request.auth != null;
     }

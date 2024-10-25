@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -142,18 +142,18 @@ const ResumeSchedule = () => {
     }
   };
 
-  const handleExerciseComplete = async (exerciseId, completed, exercise) => {
+  const handleExerciseComplete = async (exerciseId, status, exercise) => {
     if (!user) return;
 
     try {
-      if (exercise.type === 'weighted' && !weights[exerciseId] && completed) {
+      if (exercise.type === 'weighted' && !weights[exerciseId] && status === 'completed') {
         alert('Please enter a weight before marking this exercise as complete');
         return;
       }
 
       const newProgress = {
         ...exerciseProgress,
-        [exerciseId]: completed
+        [exerciseId]: status
       };
 
       const db = getFirestore();
@@ -174,12 +174,13 @@ const ResumeSchedule = () => {
     if (!user || !selectedSchedule) return;
 
     const dayExercises = selectedSchedule.exercises[`day${currentDay}`];
-    const allCompleted = dayExercises.every(ex => 
-      exerciseProgress[`${selectedSchedule.id}-${ex.name}`]
-    );
+    const allAttempted = dayExercises.every(ex => {
+      const status = exerciseProgress[`${selectedSchedule.id}-${ex.name}`];
+      return status === 'completed' || status === 'failed';
+    });
 
-    if (!allCompleted) {
-      alert('Please complete all exercises before marking the day as complete');
+    if (!allAttempted) {
+      alert('Please complete or mark as failed all exercises before marking the day as complete');
       return;
     }
 
@@ -194,21 +195,25 @@ const ResumeSchedule = () => {
       let updatedProgressionStages = { ...currentProgressData.progressionStages };
       let updatedWeights = { ...currentProgressData.weights };
 
-      // Update progression for each completed exercise
+      // Update progression only for completed exercises
       for (const exercise of dayExercises) {
         const exerciseId = `${selectedSchedule.id}-${exercise.name}`;
-        const currentStage = currentProgressData.progressionStages?.[exerciseId] || 0;
-        const currentWeight = currentProgressData.weights?.[exerciseId];
+        const status = currentProgressData.exercises?.[exerciseId];
         
-        const { stage: nextStage, weight: nextWeight } = getNextProgressionStage(
-          currentStage,
-          exercise.type,
-          currentWeight
-        );
+        if (status === 'completed') {
+          const currentStage = currentProgressData.progressionStages?.[exerciseId] || 0;
+          const currentWeight = currentProgressData.weights?.[exerciseId];
+          
+          const { stage: nextStage, weight: nextWeight } = getNextProgressionStage(
+            currentStage,
+            exercise.type,
+            currentWeight
+          );
 
-        updatedProgressionStages[exerciseId] = nextStage;
-        if (nextWeight !== currentWeight) {
-          updatedWeights[exerciseId] = nextWeight;
+          updatedProgressionStages[exerciseId] = nextStage;
+          if (nextWeight !== currentWeight) {
+            updatedWeights[exerciseId] = nextWeight;
+          }
         }
       }
 
@@ -227,7 +232,7 @@ const ResumeSchedule = () => {
       setWeights(updatedWeights);
       setLastCompletedDay(currentDay);
 
-      alert('Day completed! Progression updated for all exercises.');
+      alert('Day completed! Progression updated for completed exercises.');
     } catch (error) {
       console.error('Error completing day:', error);
     }
@@ -240,8 +245,22 @@ const ResumeSchedule = () => {
       const db = getFirestore();
       const progressDoc = doc(db, 'progress', user.uid);
 
+      // Get current progress data
       const progressSnapshot = await getDoc(progressDoc);
       const currentData = progressSnapshot.data();
+
+      // Save current progress to workout history before clearing
+      if (Object.keys(currentData.exercises).length > 0) {
+        const historyCollection = collection(db, 'workoutHistory');
+        await addDoc(historyCollection, {
+          userId: user.uid,
+          date: serverTimestamp(), // Using serverTimestamp instead of lastUpdated
+          lastCompletedDay: currentData.lastCompletedDay,
+          exercises: currentData.exercises,
+          weights: currentData.weights,
+          scheduleId: selectedSchedule.id
+        });
+      }
 
       const updatedData = {
         exercises: {},
@@ -266,9 +285,10 @@ const ResumeSchedule = () => {
   const isDayComplete = (day) => {
     if (!selectedSchedule) return false;
     const dayExercises = selectedSchedule.exercises[`day${day}`];
-    return dayExercises.every(ex => 
-      exerciseProgress[`${selectedSchedule.id}-${ex.name}`]
-    );
+    return dayExercises.every(ex => {
+      const status = exerciseProgress[`${selectedSchedule.id}-${ex.name}`];
+      return status === 'completed' || status === 'failed';
+    });
   };
 
   if (loading) {
@@ -325,11 +345,14 @@ const ResumeSchedule = () => {
           >
             <h3>Day {day}</h3>
             <div className="exercise-preview">
-              {selectedSchedule.exercises[`day${day}`].map(exercise => (
-                <p key={exercise.name} className={exerciseProgress[`${selectedSchedule.id}-${exercise.name}`] ? 'completed' : ''}>
-                  {exercise.name}
-                </p>
-              ))}
+              {selectedSchedule.exercises[`day${day}`].map(exercise => {
+                const status = exerciseProgress[`${selectedSchedule.id}-${exercise.name}`];
+                return (
+                  <p key={exercise.name} className={status || ''}>
+                    {exercise.name}
+                  </p>
+                );
+              })}
             </div>
           </div>
         ))}
@@ -340,13 +363,13 @@ const ResumeSchedule = () => {
         <div className="exercises-list">
           {selectedSchedule.exercises[`day${currentDay}`].map(exercise => {
             const exerciseId = `${selectedSchedule.id}-${exercise.name}`;
-            const isCompleted = exerciseProgress[exerciseId];
+            const status = exerciseProgress[exerciseId];
             const currentWeight = weights[exerciseId];
             const currentStage = progressionStages[exerciseId] || 0;
             const { sets, reps } = PROGRESSION_STAGES[currentStage];
             
             return (
-              <div key={exercise.name} className={`exercise-item ${isCompleted ? 'completed' : ''}`}>
+              <div key={exercise.name} className={`exercise-item ${status || ''}`}>
                 <h3>{exercise.name}</h3>
                 <p>{sets} sets x {reps} reps</p>
                 {exercise.type === 'weighted' && (
@@ -365,14 +388,26 @@ const ResumeSchedule = () => {
                     </label>
                   </div>
                 )}
-                <label className="complete-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={isCompleted || false}
-                    onChange={(e) => handleExerciseComplete(exerciseId, e.target.checked, exercise)}
-                  />
-                  Complete
-                </label>
+                <div className="exercise-status">
+                  <label className="status-option">
+                    <input
+                      type="radio"
+                      name={`status-${exerciseId}`}
+                      checked={status === 'completed'}
+                      onChange={() => handleExerciseComplete(exerciseId, 'completed', exercise)}
+                    />
+                    Complete
+                  </label>
+                  <label className="status-option">
+                    <input
+                      type="radio"
+                      name={`status-${exerciseId}`}
+                      checked={status === 'failed'}
+                      onChange={() => handleExerciseComplete(exerciseId, 'failed', exercise)}
+                    />
+                    Failed
+                  </label>
+                </div>
               </div>
             );
           })}
