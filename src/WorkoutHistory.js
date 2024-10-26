@@ -13,7 +13,6 @@ const WorkoutHistory = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     totalWorkouts: 0,
-    currentStreak: 0,
     completionRate: 0,
     mostFrequentExercise: '',
   });
@@ -73,7 +72,6 @@ const WorkoutHistory = () => {
     if (historyData.length === 0) {
       return {
         totalWorkouts: 0,
-        currentStreak: 0,
         completionRate: 0,
         mostFrequentExercise: 'None'
       };
@@ -103,20 +101,8 @@ const WorkoutHistory = () => {
     const mostFrequentExercise = Object.entries(exerciseCounts)
       .sort(([,a], [,b]) => b - a)[0]?.[0]?.split('-').slice(1).join(' ') || 'None';
 
-    // Calculate current streak based on consecutive days with completed exercises
-    let currentStreak = 0;
-    for (const entry of historyData) {
-      const hasCompletedExercises = Object.values(entry.exercises).some(status => status === 'completed');
-      if (hasCompletedExercises) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-
     return {
       totalWorkouts: totalCompleted,
-      currentStreak,
       completionRate,
       mostFrequentExercise
     };
@@ -147,10 +133,6 @@ const WorkoutHistory = () => {
         <div className="stat-card">
           <h3>Total Workouts</h3>
           <p className="stat-value">{stats.totalWorkouts}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Current Streak</h3>
-          <p className="stat-value">{stats.currentStreak} days</p>
         </div>
         <div className="stat-card">
           <h3>Completion Rate</h3>

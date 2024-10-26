@@ -66,7 +66,7 @@ const CreateSchedule = () => {
     'calves': [
       { name: 'Standing Calf Raises (Barbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
       { name: 'Seated Calf Raises (Dumbbell)', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
-      { name: 'Single-Leg Calf Raises', type: 'bodyweight', sets: 3, reps: 8, weight: null, progressionStage: 0 }
+      { name: 'Single-Leg Calf Raises', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 }
     ],
     'vanity-lifts': [
       { name: 'Dumbbell Flyes', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
@@ -153,6 +153,7 @@ const CreateSchedule = () => {
         createdAt: new Date()
       });
       alert('Schedule saved successfully!');
+      navigate('/dashboard');
     } catch (e) {
       alert('Error saving schedule: ' + e.message);
     }
