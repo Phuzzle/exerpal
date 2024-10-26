@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -30,17 +30,19 @@ const ResumeSchedule = () => {
   const [lastCompletedDay, setLastCompletedDay] = useState(null);
 
   const fetchUserData = useCallback(async (currentUser) => {
+    if (!currentUser) return;
+    
     try {
       const db = getFirestore();
       
+      // Use a query with where clause to match security rules
       const schedulesCollection = collection(db, 'schedules');
-      const schedulesSnapshot = await getDocs(schedulesCollection);
-      const schedulesList = schedulesSnapshot.docs
-        .filter(doc => doc.data().userId === currentUser.uid)
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+      const q = query(schedulesCollection, where('userId', '==', currentUser.uid));
+      const schedulesSnapshot = await getDocs(q);
+      const schedulesList = schedulesSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       setSchedules(schedulesList);
       
       const progressData = await ensureProgressDocExists(currentUser.uid);
@@ -62,7 +64,10 @@ const ResumeSchedule = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        fetchUserData(currentUser);
+        // Delay fetching data to ensure App Check is initialized
+        setTimeout(() => {
+          fetchUserData(currentUser);
+        }, 1000);
       } else {
         setLoading(false);
       }
@@ -71,6 +76,7 @@ const ResumeSchedule = () => {
     return () => unsubscribe();
   }, [fetchUserData]);
 
+  // Rest of the component code remains the same...
   const calculateNextWeight = (currentWeight) => {
     return currentWeight + 5;
   };
@@ -254,7 +260,7 @@ const ResumeSchedule = () => {
         const historyCollection = collection(db, 'workoutHistory');
         await addDoc(historyCollection, {
           userId: user.uid,
-          date: serverTimestamp(), // Using serverTimestamp instead of lastUpdated
+          date: serverTimestamp(),
           lastCompletedDay: currentData.lastCompletedDay,
           exercises: currentData.exercises,
           weights: currentData.weights,

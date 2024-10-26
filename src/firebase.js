@@ -14,16 +14,29 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Initialize App Check
-if (process.env.NODE_ENV === 'development') {
-  // @ts-ignore
-  window.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
+// Initialize App Check with error handling
+try {
+  if (process.env.NODE_ENV === 'development') {
+    // @ts-ignore
+    window.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
 
-initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(process.env.REACT_APP_RECAPTCHA_SITE_KEY),
-  isTokenAutoRefreshEnabled: true
-});
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(process.env.REACT_APP_RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true
+  });
+
+  // Force initial token request
+  appCheck.getToken()
+    .then(() => {
+      console.log('App Check initialized successfully');
+    })
+    .catch((error) => {
+      console.error('Error initializing App Check:', error);
+    });
+} catch (error) {
+  console.error('Failed to initialize App Check:', error);
+}
 
 const auth = getAuth(app);
 const db = getFirestore(app);
