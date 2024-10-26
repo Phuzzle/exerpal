@@ -98,6 +98,7 @@ const LandingPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
             className={error && !email ? 'error' : ''}
+            autoComplete="username"
           />
         </div>
         <div className="form-group">
@@ -108,6 +109,7 @@ const LandingPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
             className={error && !password ? 'error' : ''}
+            autoComplete="current-password"
           />
         </div>
         <div className="button-group">
