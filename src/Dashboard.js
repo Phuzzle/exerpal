@@ -1,11 +1,29 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Welcome to ExerPal</h1>
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">Welcome to ExerPal</h1>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
       <p className="dashboard-subtitle">
         Your personal fitness companion. Choose from the options below to start your fitness journey
         or continue with your existing workout plan.

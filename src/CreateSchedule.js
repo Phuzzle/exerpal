@@ -1,9 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import './CreateSchedule.css';
 
 const CreateSchedule = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        navigate('/');
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   const exercises = {
     'pec-dominant': [
       { name: 'Barbell Bench Press', type: 'weighted', sets: 3, reps: 8, weight: null, progressionStage: 0 },
@@ -108,7 +123,6 @@ const CreateSchedule = () => {
     const currentCount = selectedExercises[day].filter(ex => exercises[muscleGroup].some(e => e.name === ex.name)).length;
     const exercise = exercises[muscleGroup].find(ex => ex.name === exerciseName);
 
-    // If exercise is already selected, remove it
     if (selectedExercises[day].some(ex => ex.name === exerciseName)) {
       setSelectedExercises(prevState => ({
         ...prevState,
@@ -117,7 +131,6 @@ const CreateSchedule = () => {
       return;
     }
 
-    // If exercise limit is not reached, add it
     if (currentCount < exerciseLimits[day][muscleGroup]) {
       setSelectedExercises(prevState => ({
         ...prevState,
@@ -189,6 +202,10 @@ const CreateSchedule = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="create-schedule">

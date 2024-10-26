@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import './AdjustProgress.css';
 
 const PROGRESSION_STAGES = [
   { sets: 3, reps: 8 },
@@ -18,6 +19,7 @@ const AdjustProgress = () => {
   const [schedule, setSchedule] = useState(null);
   const [progressData, setProgressData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tempChanges, setTempChanges] = useState({});
   const orderedDays = ['day1', 'day2', 'day3', 'day4', 'day5'];
 
   useEffect(() => {
@@ -63,8 +65,27 @@ const AdjustProgress = () => {
     );
   };
 
-  const handleExerciseUpdate = async (day, exerciseIndex, field, value) => {
-    if (!schedule || !progressData) return;
+  const handleTempChange = (day, exerciseIndex, field, value) => {
+    const exercise = schedule.exercises[day][exerciseIndex];
+    const exerciseId = `${schedule.id}-${exercise.name}`;
+    const changeKey = `${day}-${exerciseIndex}`;
+
+    setTempChanges(prev => ({
+      ...prev,
+      [changeKey]: {
+        ...prev[changeKey],
+        [field]: value,
+        exerciseId,
+        day,
+        index: exerciseIndex
+      }
+    }));
+  };
+
+  const handleSaveChanges = async (day, exerciseIndex) => {
+    const changeKey = `${day}-${exerciseIndex}`;
+    const changes = tempChanges[changeKey];
+    if (!changes) return;
 
     const exercise = schedule.exercises[day][exerciseIndex];
     const exerciseId = `${schedule.id}-${exercise.name}`;
@@ -76,9 +97,10 @@ const AdjustProgress = () => {
       const updatedExercise = { ...exercise };
       let validStage;
 
-      if (field === 'sets' || field === 'reps') {
-        const newSets = field === 'sets' ? parseInt(value) : exercise.sets;
-        const newReps = field === 'reps' ? parseInt(value) : exercise.reps;
+      // Handle sets and reps changes
+      if (changes.sets || changes.reps) {
+        const newSets = changes.sets ? parseInt(changes.sets) : exercise.sets;
+        const newReps = changes.reps ? parseInt(changes.reps) : exercise.reps;
         
         validStage = findValidProgressionStage(newSets, newReps);
         if (validStage === -1) {
@@ -86,7 +108,8 @@ const AdjustProgress = () => {
           return;
         }
 
-        updatedExercise[field] = parseInt(value);
+        if (changes.sets) updatedExercise.sets = parseInt(changes.sets);
+        if (changes.reps) updatedExercise.reps = parseInt(changes.reps);
 
         // Update schedule in Firestore
         const scheduleRef = doc(db, 'schedules', schedule.id);
@@ -110,24 +133,31 @@ const AdjustProgress = () => {
           ...prevSchedule,
           exercises: updatedExercises
         }));
+      }
 
-      } else if (field === 'weight' && exercise.type === 'weighted') {
-        // Update weight in progress collection
+      // Handle weight changes
+      if (changes.weight !== undefined && exercise.type === 'weighted') {
         const progressDoc = doc(db, 'progress', user.uid);
         await updateDoc(progressDoc, {
-          [`weights.${exerciseId}`]: parseFloat(value),
+          [`weights.${exerciseId}`]: parseFloat(changes.weight),
           lastUpdated: new Date()
         });
 
-        // Update local progress data
         setProgressData(prevData => ({
           ...prevData,
           weights: {
             ...prevData.weights,
-            [exerciseId]: parseFloat(value)
+            [exerciseId]: parseFloat(changes.weight)
           }
         }));
       }
+
+      // Clear the temp changes for this exercise
+      setTempChanges(prev => {
+        const newChanges = { ...prev };
+        delete newChanges[changeKey];
+        return newChanges;
+      });
 
     } catch (error) {
       console.error('Error updating exercise:', error);
@@ -157,6 +187,8 @@ const AdjustProgress = () => {
             <h2>{formatDayTitle(day)}</h2>
             {schedule.exercises[day].map((exercise, index) => {
               const exerciseId = `${schedule.id}-${exercise.name}`;
+              const changeKey = `${day}-${index}`;
+              const changes = tempChanges[changeKey] || {};
               const currentWeight = progressData?.weights?.[exerciseId] || 0;
 
               return (
@@ -167,24 +199,30 @@ const AdjustProgress = () => {
                     <div className="progress-control">
                       <label>Sets:</label>
                       <select
-                        value={exercise.sets}
-                        onChange={(e) => handleExerciseUpdate(day, index, 'sets', e.target.value)}
+                        value={changes.sets || exercise.sets}
+                        onChange={(e) => handleTempChange(day, index, 'sets', e.target.value)}
                       >
                         <option value="3">3</option>
                         <option value="4">4</option>
                         <option value="5">5</option>
                       </select>
+                      {changes.sets && (
+                        <span className="pending-changes">Current: {exercise.sets}</span>
+                      )}
                     </div>
                     <div className="progress-control">
                       <label>Reps:</label>
                       <select
-                        value={exercise.reps}
-                        onChange={(e) => handleExerciseUpdate(day, index, 'reps', e.target.value)}
+                        value={changes.reps || exercise.reps}
+                        onChange={(e) => handleTempChange(day, index, 'reps', e.target.value)}
                       >
                         <option value="8">8</option>
                         <option value="10">10</option>
                         <option value="12">12</option>
                       </select>
+                      {changes.reps && (
+                        <span className="pending-changes">Current: {exercise.reps}</span>
+                      )}
                     </div>
                     {exercise.type === 'weighted' && (
                       <div className="progress-control">
@@ -193,11 +231,23 @@ const AdjustProgress = () => {
                           type="number"
                           min="0"
                           step="5"
-                          value={currentWeight}
-                          onChange={(e) => handleExerciseUpdate(day, index, 'weight', e.target.value)}
+                          value={changes.weight !== undefined ? changes.weight : currentWeight}
+                          onChange={(e) => handleTempChange(day, index, 'weight', e.target.value)}
                         />
+                        {changes.weight !== undefined && (
+                          <span className="pending-changes">Current: {currentWeight}kg</span>
+                        )}
                       </div>
                     )}
+                  </div>
+                  <div className="exercise-controls">
+                    <button
+                      className="save-button"
+                      onClick={() => handleSaveChanges(day, index)}
+                      disabled={!tempChanges[changeKey]}
+                    >
+                      Save Changes
+                    </button>
                   </div>
                 </div>
               );
