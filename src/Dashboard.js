@@ -25,7 +25,7 @@ const Dashboard = () => {
         </button>
       </div>
       <p className="dashboard-subtitle">
-        Your exclusive fitness companion, crafted by Glens for Glens. This personalized fitness experience
+        Your exclusive fitness companion, crafted for Glens by Glens. This personalized fitness experience
         is designed to meet your unique workout needs and preferences. Choose from the options below to start
         your fitness journey or continue with your existing workout plan.
       </p>
